@@ -13,13 +13,20 @@ def api = new XmlSlurper().parseText(raw)
 def doc = Jsoup.parse(api.parse.text.toString())
 def table = doc.select("table");
 
+assert table.size() == 1
+
 def rows = table.select("tr");
-rows.each {
-  def country = it.select("td a").first()?.text()
-  if (country) {
-    println country
+
+new File("./src/main/resources/io.jvelo.turf",'countries.csv').withWriter('utf-8') { writer ->
+  rows.each {
+    def country = it.select("td a").first()?.text()
+    if (country) {
+      def alpha2 = it.select("td")[1].text()
+      def alpha3 = it.select("td")[2].text()
+      def numeric = it.select("td")[3].text()
+      writer.writeLine([country, alpha2, alpha3, numeric].join(";"))
+    }
   }
 }
 
-assert table.size() == 1
 
